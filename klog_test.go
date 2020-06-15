@@ -820,6 +820,27 @@ func TestInfoS(t *testing.T) {
 	}
 }
 
+// Test that V(0).InfoS works as advertised.
+func TestVInfos(t *testing.T) {
+	setFlags()
+	defer logging.swap(logging.newBuffers())
+	timeNow = func() time.Time {
+		return time.Date(2006, 1, 2, 15, 4, 5, .067890e9, time.Local)
+	}
+	pid = 1234
+	V(0).InfoS("test", "pod", "kubedns")
+	var line int
+	format := "I0102 15:04:05.067890    1234 klog_test.go:%d] \"test\" pod=\"kubedns\"\n"
+	n, err := fmt.Sscanf(contents(infoLog), format, &line)
+	if n != 1 || err != nil {
+		t.Errorf("log format error: %d elements, error %s:\n%s", n, err, contents(infoLog))
+	}
+	want := fmt.Sprintf(format, line)
+	if contents(infoLog) != want {
+		t.Errorf("V.InfoS has wrong format: \n got:\t%s\nwant:\t%s", contents(infoLog), want)
+	}
+}
+
 // Test that ErrorS works as advertised.
 func TestErrorS(t *testing.T) {
 	setFlags()
