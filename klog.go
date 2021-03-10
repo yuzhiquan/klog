@@ -909,6 +909,12 @@ func (l *loggingT) output(s severity, log logr.Logger, buf *buffer, file string,
 	if log != nil {
 		// TODO: set 'severity' and caller information as structured log info
 		// keysAndValues := []interface{}{"severity", severityName[s], "file", file, "line", line}
+		if l.toStderr {
+			if toError, ok := log.(ToStderr); ok {
+				toError.SetLogToStderr()
+			}
+		}
+
 		if s == errorLog {
 			l.logr.Error(nil, string(data))
 		} else {
