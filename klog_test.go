@@ -1754,3 +1754,81 @@ func TestKlogFlagPrefix(t *testing.T) {
 		}
 	})
 }
+
+func TestKObjs(t *testing.T) {
+	tests := []struct {
+		name string
+		obj  interface{}
+		want []ObjectRef
+	}{
+		{
+			name: "test for KObjs function with KMetadata slice",
+			obj: []kMetadataMock{
+				{
+					name: "kube-dns",
+					ns:   "kube-system",
+				},
+				{
+					name: "mi-conf",
+				},
+				{},
+			},
+			want: []ObjectRef{
+				{
+					Name:      "kube-dns",
+					Namespace: "kube-system",
+				},
+				{
+					Name: "mi-conf",
+				},
+				{},
+			},
+		},
+		{
+			name: "test for KObjs function with KMetadata pointer slice",
+			obj: []*kMetadataMock{
+				{
+					name: "kube-dns",
+					ns:   "kube-system",
+				},
+				{
+					name: "mi-conf",
+				},
+				nil,
+			},
+			want: []ObjectRef{
+				{
+					Name:      "kube-dns",
+					Namespace: "kube-system",
+				},
+				{
+					Name: "mi-conf",
+				},
+				{},
+			},
+		},
+		{
+			name: "test for KObjs function with slice does not implement KMetadata",
+			obj:  []int{1, 2, 3, 4, 6},
+			want: nil,
+		},
+		{
+			name: "test for KObjs function with interface",
+			obj:  "test case",
+			want: nil,
+		},
+		{
+			name: "test for KObjs function with nil",
+			obj:  nil,
+			want: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if !reflect.DeepEqual(KObjs(tt.obj), tt.want) {
+				t.Errorf("\nwant:\t %v\n got:\t %v", tt.want, KObjs(tt.obj))
+			}
+		})
+	}
+}
